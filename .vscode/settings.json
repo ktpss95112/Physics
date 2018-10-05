@@ -1,0 +1,5 @@
+{
+    "python.pythonPath": "/usr/bin/python3",
+    "python.autoComplete.preloadModules": ["math", "vpython", "matplotlib"],
+    "python.autoComplete.addBrackets": true
+}
