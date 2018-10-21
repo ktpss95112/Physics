@@ -7,6 +7,7 @@ mass = 1
 x_left_bound = -5
 x_right_bound = 5
 dx = 0.01
+dt = 0.001
 Um = 0
 x1 = None
 x2 = None
@@ -30,6 +31,10 @@ def init():
             x1, x2 = -x, x
             Um = U(x)
 
+'''
+Below are the functions of the subtasks of this homework.
+
+'''
 def plot_F():
     global x_left_bound, x_right_bound, dx
 
@@ -51,7 +56,6 @@ def plot_F():
     #ax.plot(x2, Um, color='k')
     ax.legend(loc='best')
 
-
 # phase-space trajectory
 def plot_pst(x0, direction):
     global x_left_bound, x_right_bound, dx
@@ -66,35 +70,43 @@ def plot_pst(x0, direction):
     for i in [0, 1, 2, 3]:
         E = E_cf[i]*Um
         x = x0
+        tmp_dir = direction
 
         # case 0: bounded motion
         if x1 < x < x2:
             for cnt in range(2*int((x2-x1)/dx)):
+                if U(x) > E:
+                    tmp_dir = -tmp_dir
+                    x += dx*tmp_dir
+                    continue
+
                 list_x.append(x)
-                list_v.append(V(x, E)*direction)
-                x += dx*direction
+                list_v.append(V(x, E)*tmp_dir)
+                x += dx*tmp_dir
 
-                # update direction
-
-        # case 1: right side
-        elif x > x2:
-
-
-        # case 2: left side
+        # case 1: else
         else:
+            while x_left_bound < x < x_right_bound:
+                if U(x) > E:
+                    tmp_dir = -tmp_dir
+                    x += dx*tmp_dir
+                    continue
+
+                list_x.append(x)
+                list_v.append(V(x, E)*tmp_dir)
+                x += dx*tmp_dir
 
 
         ax.plot(list_x, list_v, label='E=%.1fUm'%(E_cf[i]))
         list_x = []
         list_v = []
-        print('%d printed'%(i))
 
     for i in [4]:
         E = E_cf[i]*Um
         x = x0
 
-        # if !(x==x1 || x==x2)
-        while not(abs(x-x1)<dx or abs(x-x2)<dx):
+        # if !(x==x1 || x==x2) && (xl<x<xr)
+        while not(abs(x-x1)<dx or abs(x-x2)<dx) and (x_left_bound<x<x_right_bound):
             list_x.append(x)
             list_v.append(V(x, E)*direction)
             x += dx*direction
@@ -102,7 +114,6 @@ def plot_pst(x0, direction):
         ax.plot(list_x, list_v, label='E=%.1fUm'%(E_cf[i]))
         list_x = []
         list_v = []
-        print('%d printed'%(i))
 
     for i in [5, 6]:
         E = E_cf[i]*Um
@@ -116,8 +127,26 @@ def plot_pst(x0, direction):
         ax.plot(list_x, list_v, label='E=%.1fUm'%(E_cf[i]))
         list_x = []
         list_v = []
-        print('%d printed'%(i))
 
 
     ax.legend(loc='best')
+    ax.axhline(y=0, color='k', linewidth=0.5)
 
+def print_amplitude_and_period():
+    global dt, x1, x2, mass
+
+    E = 0.4*Um
+    t = 0
+    x = 0
+    v = V(x, E)
+    #print('%.2f %.2f'%(v, F(x)))
+
+    while U(x) < E:
+        dx, dv = v*dt, F(x)/mass*dt
+        x += dx
+        v += dv
+        t += dt
+        #print('%.2f %.2f'%(x, v))
+
+    print('period: %.2f sec'%(4*t))
+    print('amplitude: %.2f m'%(x))

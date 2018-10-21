@@ -1,0 +1,2 @@
+period: 4.94 sec
+amplitude: 0.59 m
