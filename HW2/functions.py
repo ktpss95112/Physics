@@ -38,23 +38,32 @@ Below are the functions of the subtasks of this homework.
 def plot_F():
     global x_left_bound, x_right_bound, dx
 
-    fig, ax = plt.subplots()
-    ax.set_title("F(x)")
-    ax.set_xlabel("x (m)")
-    ax.set_ylabel("F (Nt)")
-    ax.axhline(y=0, color='k', linewidth=0.5)
+    fig, axF = plt.subplots()
+    axU = axF.twinx()
+    axF.get_shared_y_axes().join(axF, axU)
+    axF.set_title("F(x)")
+    axF.set_xlabel("x (m)")
+    axF.set_ylabel("F (Nt)", color='tab:blue')
+    axF.tick_params(axis='y', labelcolor='tab:blue')
+    axU.set_ylabel("U (J)", color='tab:orange')
+    axU.tick_params(axis='y', labelcolor='tab:orange')
+    axF.axhline(y=0, color='k', linewidth=0.5)
 
     list_x = [x for x in np.arange(x_left_bound, x_right_bound, dx)]
     list_F = [F(x) for x in list_x]
     list_U = [U(x) for x in list_x]
 
-    ax.plot(list_x, list_F, label='F(x)')
-    ax.plot(list_x, list_U, label='U(x)')
-    ax.text(x1-1.3, Um+0.04, 'x1=%.2f'%(x1))
-    #ax.plot(x1, Um, color='k')
-    ax.text(x2-0.7, Um+0.04, 'x2=%.2f'%(x2))
-    #ax.plot(x2, Um, color='k')
-    ax.legend(loc='best')
+    axF.plot(list_x, list_F, label='F(x)', color='tab:blue')
+    axF.plot(list_x, list_U, label='U(x)', color='tab:orange')
+    axF.text(x1-1.4, Um+0.04, 'x1=%.2f(m)'%(x1))
+    axF.text(x2-0.7, Um+0.04, 'x2=%.2f(m)'%(x2))
+    axU.axhline(y=Um, color='k', linewidth=0.5, linestyle='--')
+    axU.text(-4.5, Um-0.07, 'Um=%.2f(J)'%(Um))
+
+    axF.legend(loc='lower right')
+    plt.subplots_adjust(top=0.88, bottom=0.11, left=0.12, right=0.885, hspace=0.2, wspace=0.2)
+
+
 
 # phase-space trajectory
 def plot_pst(x0, direction):
@@ -63,7 +72,7 @@ def plot_pst(x0, direction):
     list_v = []
 
     fig, ax = plt.subplots()
-    ax.set_title("Phase-space Trajectory (x0=%.2f , v0=%.2f)"%(x0, V(x0, Um)*direction))
+    ax.set_title("Phase-space Trajectory (x0=%.2fm)"%(x0))
     ax.set_xlabel("x (m)")
     ax.set_ylabel("v (m/s)")
 
