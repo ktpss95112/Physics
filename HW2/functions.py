@@ -139,14 +139,12 @@ def print_amplitude_and_period():
     t = 0
     x = 0
     v = V(x, E)
-    #print('%.2f %.2f'%(v, F(x)))
 
-    while U(x) < E:
+    while v >= 0:
         dx, dv = v*dt, F(x)/mass*dt
         x += dx
         v += dv
         t += dt
-        #print('%.2f %.2f'%(x, v))
 
-    print('period: %.2f sec'%(4*t))
-    print('amplitude: %.2f m'%(x))
+    print('period: %.3f sec'%(4*t))
+    print('amplitude: %.3f m'%(x))
