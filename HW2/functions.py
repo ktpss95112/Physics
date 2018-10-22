@@ -120,6 +120,8 @@ def plot_pst(x0, direction):
             list_v.append(V(x, E)*direction)
             x += dx*direction
 
+        list_x.append(x)
+        list_v.append(0)
         ax.plot(list_x, list_v, label='E=%.1fUm'%(E_cf[i]))
         list_x = []
         list_v = []
