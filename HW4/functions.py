@@ -84,19 +84,24 @@ def evolve(right_wall_fixed):
         right_wall_pos += u * dt
 
     for at in atoms:
-        if at.pos.x >= right_wall_pos: pressure += ((2 * m * at.vel.x) / (pressure_period)) / (L ** 2)
+        if at.pos.x >= right_wall_pos-r: pressure += ((2 * m * at.vel.x) / (pressure_period)) / (L ** 2)
         
-        if (not right_wall_fixed) and (at.pos.x >= right_wall_pos):
-            at.pos.x = right_wall_pos
-            at.vel.x = 2*u - at.vel.x
-        elif not -L/2 < at.pos.x < L/2:
-            at.pos.x = L/2 if at.pos.x > 0 else -L/2
+        if not right_wall_fixed:
+            if at.pos.x >= right_wall_pos-r:
+                if right_wall_pos < (3/2)*L: at.vel.x = 2*u - at.vel.x
+                else:                        at.vel.x *= -1
+                at.pos.x = right_wall_pos
+            if at.pos.x <= -L/2+r:
+                at.pos.x = -L/2
+                at.vel.x *= -1
+        elif not -L/2+r < at.pos.x < L/2-r:
+            at.pos.x = L/2-r if at.pos.x > 0 else -L/2+r
             at.vel.x *= -1
-        if not -L/2 < at.pos.y < L/2:
-            at.pos.y = L/2 if at.pos.y > 0 else -L/2
+        if not -L/2+r < at.pos.y < L/2-r:
+            at.pos.y = L/2-r if at.pos.y > 0 else -L/2+r
             at.vel.y *= -1
-        if not -L/2 < at.pos.z < L/2:
-            at.pos.z = L/2 if at.pos.z > 0 else -L/2
+        if not -L/2+r < at.pos.z < L/2-r:
+            at.pos.z = L/2-r if at.pos.z > 0 else -L/2+r
             at.vel.z *= -1
 
     t += dt
@@ -114,7 +119,7 @@ if __name__ == '__main__':
     particles_init()
 
     while True:
-        evolve()
+        evolve(right_wall_fixed=True)
 
 
 
@@ -139,6 +144,7 @@ def task_3():
         ymax = (N*deltav*sqrt(m/(2*pi*kB*T))) * 1.1
         plt.yticks(np.arange(0, ymax, 3))
         plt.ylim(top=ymax)
+        # TODO: use blit and patch to boost performance
 
     fig = plt.figure()
     draw_theory_line()
@@ -162,7 +168,50 @@ def task_4():
 
 
 def task_5():
-    pass
+    # let the particles run for a while in order to distribute the velocity
+    for _ in range(100):
+        evolve(right_wall_fixed=True) 
+
+    fig, ax = plt.subplots()
+    line, = ax.plot([], [])
+
+    #t_list = [0]
+    #T_list = [(m * np.mean(np.square([at.vel.mag for at in atoms]))) / (3 * kB)]
+
+    def init():
+        global atoms, m, kB
+        global t_list, T_list
+        t_list = [0]
+        T_list = [(m * np.mean(np.square([at.vel.mag for at in atoms]))) / (3 * kB)]
+        ax.set_ylim(0, T_list[-1]*1.1)
+        line.set_data(t_list, T_list)
+        ax.grid()
+        return line,
+
+    def update_graph(frame):
+        global dt, atoms, m, kB
+        global t_list, T_list
+        #print(t_list, T_list, sep='\n', end='\n\n')
+        evolve(right_wall_fixed=False)
+
+        t_list.append(t_list[-1] + dt)
+        rms2 = np.mean(np.square([at.vel.mag for at in atoms]))
+        T_list.append((m * rms2) / (3 * kB))
+        print(T[-1])
+
+        tmin, tmax = ax.get_xlim()
+        if t_list[-1] >= tmax:
+            ax.set_xlim(tmin, 2*tmax)
+            ax.figure.canvas.draw()
+        line.set_data(t_list, T_list)
+        #plt.cla()
+        #plt.plot(t_list, T_list)
+        return line,
+
+    global animation
+    animation = animation.FuncAnimation(fig, update_graph, blit=True, init_func=init, interval=1)
+    plt.show()
+
 
 
 
