@@ -18,6 +18,7 @@ N = 200
 deltav = 1
 T = 0.004
 pressure_period = 1
+u = 0.1
 
 def disable_animation():
     global SHOW_ANIMATION
@@ -54,10 +55,12 @@ def particles_init():
         if SHOW_ANIMATION:
             atoms_ani.append(sphere(pos = atoms[i].pos, radius = r, color = color.blue))
 
-sum_of_F = 0
+
+
+pressure = 0
 right_wall_pos = L/2
 def evolve(right_wall_fixed):
-    global r, L, SHOW_ANIMATION, t, dt, N, atoms, atoms_ani, pressure_period
+    global r, L, m, SHOW_ANIMATION, t, dt, N, atoms, atoms_ani, pressure_period, right_wall_pos
     # generate next position and velocity
     for i in range(N):
         atoms[i].pos += atoms[i].vel * dt
@@ -74,11 +77,20 @@ def evolve(right_wall_fixed):
             at2.vel = v2 + dot(v1-v2, x1-x2)/mag2(x1-x2)*(x1-x2)
 
     # handle collision between atoms and wall
-    global sum_of_F
-    if abs(t - pressure_period) < 0.1*dt: sum_of_F = 0
+    # calculate pressure
+    global pressure
+    if abs(t - pressure_period) < 0.1*dt: pressure, t = 0, 0
+    if (not right_wall_fixed) and (right_wall_pos < (3/2)*L):
+        right_wall_pos += u * dt
+
     for at in atoms:
-        if not -L/2 < at.pos.x < right_wall_pos:
-            at.pos.x = right_wall_pos if at.pos.x > 0 else -L/2
+        if at.pos.x >= right_wall_pos: pressure += ((2 * m * at.vel.x) / (pressure_period)) / (L ** 2)
+        
+        if (not right_wall_fixed) and (at.pos.x >= right_wall_pos):
+            at.pos.x = right_wall_pos
+            at.vel.x = 2*u - at.vel.x
+        elif not -L/2 < at.pos.x < L/2:
+            at.pos.x = L/2 if at.pos.x > 0 else -L/2
             at.vel.x *= -1
         if not -L/2 < at.pos.y < L/2:
             at.pos.y = L/2 if at.pos.y > 0 else -L/2
@@ -90,8 +102,11 @@ def evolve(right_wall_fixed):
     t += dt
 
     if SHOW_ANIMATION:
+        # TODO: move right wall if not right_wall_fixed
         for i in range(N):
             atoms_ani[i].pos = atoms[i].pos
+
+
 
 
 if __name__ == '__main__':
@@ -134,7 +149,15 @@ def task_3():
 
 
 def task_4():
-    pass
+    global pressure
+    while True:
+        if abs(t - pressure_period) < 0.1*dt:
+            print('Pressure:', pressure)
+            global N, kB, T, L
+            print('Ideal   :', (N * kB * T / (L ** 3)))
+            print()
+        evolve(right_wall_fixed=True)
+
 
 
 
