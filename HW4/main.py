@@ -8,4 +8,4 @@ animation_init()
 particles_init()
 
 # available arguments: 3, 4, 5
-task(3)
+task(5)

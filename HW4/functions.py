@@ -130,23 +130,30 @@ def task_3():
         n = [N*deltav*sqrt(m/(2*pi*kB*T))*exp(-(m/(2*kB*T))*(_vx**2)) for _vx in vx]
         plt.plot(vx, n)
 
+    fig, ax = plt.subplots()
+    ax.set_title('Distribution of Velocity')
+    ax.set_xlabel('velocity (m/s)')
+    ax.set_ylabel('number of particles')
+
     def update_hist(frame):
         global m, kB, deltav, atoms, T
-        plt.cla()
-        plt.grid()
+        ax.cla()
+        ax.grid()
+        ax.set_title('Distribution of Velocity')
+        ax.set_xlabel('velocity (m/s)')
+        ax.set_ylabel('number of particles')
         draw_theory_line()
 
         evolve(right_wall_fixed=True)
         vx_list = [at.vel.x for at in atoms]
-        plt.hist(vx_list, np.arange(-10, 10+deltav, deltav))
+        ax.hist(vx_list, np.arange(-10, 10+deltav, deltav))
         plt.xticks(np.arange(-10, 10+deltav, 1))
-        plt.xlim(-10, 10)
+        ax.set_xlim(-10, 10)
         ymax = (N*deltav*sqrt(m/(2*pi*kB*T))) * 1.1
         plt.yticks(np.arange(0, ymax, 3))
-        plt.ylim(top=ymax)
+        ax.set_ylim(top=ymax)
         # TODO: use blit and patch to boost performance
 
-    fig = plt.figure()
     draw_theory_line()
     global animation
     animation = animation.FuncAnimation(fig, update_hist)
@@ -169,11 +176,15 @@ def task_4():
 
 def task_5():
     # let the particles run for a while in order to distribute the velocity
-    for _ in range(100):
+    for _ in range(50):
         evolve(right_wall_fixed=True) 
 
     fig, ax = plt.subplots()
     line, = ax.plot([], [])
+    ax.grid()
+    ax.set_title('Temperature of Expanding Box')
+    ax.set_xlabel('time (sec)')
+    ax.set_ylabel('temperature (K)')
 
     #t_list = [0]
     #T_list = [(m * np.mean(np.square([at.vel.mag for at in atoms]))) / (3 * kB)]
@@ -181,31 +192,32 @@ def task_5():
     def init():
         global atoms, m, kB
         global t_list, T_list
+        global printed_expand_maximum
+        printed_expand_maximum = False
         t_list = [0]
         T_list = [(m * np.mean(np.square([at.vel.mag for at in atoms]))) / (3 * kB)]
-        ax.set_ylim(0, T_list[-1]*1.1)
+        ax.set_ylim(0.0015, T_list[-1]*1.1)
         line.set_data(t_list, T_list)
-        ax.grid()
         return line,
 
     def update_graph(frame):
         global dt, atoms, m, kB
         global t_list, T_list
-        #print(t_list, T_list, sep='\n', end='\n\n')
         evolve(right_wall_fixed=False)
+        global printed_expand_maximum
+        if (right_wall_pos >= (3/2)*L) and (not printed_expand_maximum):
+            print('expand reach maximum')
 
         t_list.append(t_list[-1] + dt)
         rms2 = np.mean(np.square([at.vel.mag for at in atoms]))
         T_list.append((m * rms2) / (3 * kB))
-        print(T[-1])
+        print('T =', T_list[-1])
 
         tmin, tmax = ax.get_xlim()
         if t_list[-1] >= tmax:
             ax.set_xlim(tmin, 2*tmax)
             ax.figure.canvas.draw()
         line.set_data(t_list, T_list)
-        #plt.cla()
-        #plt.plot(t_list, T_list)
         return line,
 
     global animation
