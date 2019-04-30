@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+np.set_printoptions(precision=3, linewidth=120)
 
 # assume that there are 10 nodes
 # and there are 4 batteries
@@ -39,6 +40,7 @@ for line in sys.stdin:
         matrix[battery_index, nj] -= 1
         values[battery_index, 0] = value
         battery_index += 1
+    # print(matrix, '\n')
 
 # print(matrix)
 
