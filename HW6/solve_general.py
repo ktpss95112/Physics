@@ -47,7 +47,7 @@ for line in inputs:
         matrix[nj, ni] -= (1 / value)
         matrix[nj, nj] += (1 / value)
     else:
-        labels.append(f'I{ni},{nj}')
+        labels.append(f'I{ni+1},{nj+1}')
         if ni != 0:
             matrix[ni, battery_index] += 1
         matrix[nj, battery_index] -= 1
