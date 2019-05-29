@@ -9,10 +9,10 @@ class CC:
     R = 5
     C = 10e-6
     L = 200e-6
-    dt = 1e-7
+    dt = 1e-8
     Q_at_t0 = 0
     I_at_t0 = 0
-    max_t = dt * 10000
+    max_t = 1e-3
 
 
 def gen_t_Q_I():
@@ -28,6 +28,14 @@ def gen_t_Q_I():
         yield t, QI[0,0], QI[1,0]
 
 
+def get_t_PR_PC_PL():
+    ts, Qs, Is = np.array(tuple(gen_t_Q_I())).T
+    PRs = np.multiply(Is, Is * CC.R)
+    PCs = np.multiply(Is, Qs / CC.C)
+    PLs = np.multiply(Is[:-1], np.diff(Is) / CC.dt * CC.L)
+    return ts, PRs, PCs, np.append(PLs, PLs[-1])
+
+
 def task_2():
     ts, Qs, Is = np.array(tuple(gen_t_Q_I())).T
 
@@ -37,6 +45,7 @@ def task_2():
 
     axQ.plot(ts, Qs*1e6, label='Q(t)', color='tab:blue')
     axI.plot(ts, Is, label='I(t)', color='tab:orange')
+    # axI.plot(ts, np.multiply(Is, Qs*1e6), color='tab:green')
 
     axQ.set_title(f'Q-t I-t Curve ( dt = {CC.dt} )')
     axQ.set_xlabel('t (sec)')
@@ -52,10 +61,27 @@ def task_2():
     plt.show()
 
 
+def task_4():
+    ts, PRs, PCs, PLs = get_t_PR_PC_PL()
+
+    # fig = plt.figure(figsize=(4, 3), dpi=250)
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+
+    ax.plot(ts, PRs, label='$P_{R}(t)$')
+    ax.plot(ts, PCs, label='$P_{C}(t)$')
+    ax.plot(ts, PLs, label='$P_{L}(t)$')
+
+    ax.set_title(f'P-t Curve ( dt = {CC.dt} )')
+    ax.set_xlabel('t (sec)')
+    ax.set_ylabel('P (J)', rotation=0)
+    ax.axhline(y=0, color='k', linewidth=0.5)
+    ax.set_xlim(left=ts[0], right=ts[-1])
+    ax.legend(loc='upper right')
+    plt.show()
 
 
-
-task_2()
-
+# task_2()
+task_4()
 
 
