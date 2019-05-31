@@ -81,7 +81,7 @@ def task_4():
     plt.show()
 
 
-# task_2()
-task_4()
+task_2()
+# task_4()
 
 
