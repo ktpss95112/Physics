@@ -74,14 +74,14 @@ def task_4():
 
     ax.set_title(f'P-t Curve ( dt = {CC.dt} )')
     ax.set_xlabel('t (sec)')
-    ax.set_ylabel('P (J)', rotation=0)
+    ax.set_ylabel('P (W)', rotation=0)
     ax.axhline(y=0, color='k', linewidth=0.5)
     ax.set_xlim(left=ts[0], right=ts[-1])
     ax.legend(loc='upper right')
     plt.show()
 
 
-task_2()
-# task_4()
+# task_2()
+task_4()
 
 
