@@ -102,26 +102,33 @@ def task_4():
     ts, PVs, PRs, PCs, PLs = get_t_PV_PR_PC_PL()
 
     # fig = plt.figure(figsize=(4, 3), dpi=250)
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
+    fig, (axup, axdown) = plt.subplots(2)
 
-    # ax.plot(ts, PVs, label='$P_{V}(t)$')
-    # ax.plot(ts, PRs+PCs+PLs, label='$P_{sum}(t)$')
-    ax.plot(ts, PRs, label='$P_{R}(t)$')
-    ax.plot(ts, PCs, label='$P_{C}(t)$')
-    ax.plot(ts, PLs, label='$P_{L}(t)$')
+    axup.plot(ts, PRs, label='$P_{R}(t)$')
+    axup.plot(ts, PCs, label='$P_{C}(t)$')
+    axup.plot(ts, PLs, label='$P_{L}(t)$')
 
-    ax.set_title(f'P-t Curve ( dt = {CC.dt} )')
-    ax.set_xlabel('t (sec)')
-    ax.set_ylabel('P (W)', rotation=0)
-    ax.axhline(y=0, color='k', linewidth=0.5)
-    ax.set_xlim(left=ts[0], right=ts[-1])
-    ax.legend(loc='upper right')
+    axdown.plot(ts, PRs+PCs+PLs, label='$P_{RLC}(t)$')
+    axdown.plot(ts, PVs, label='$P_{emf}(t)$')
+
+    axup.set_title('$P_{R}(t)$ v.s. $P_{C}(t)$ v.s. $P_{L}(t)$ ' + f'( dt = {CC.dt} )')
+    axup.set_xlabel('t (sec)')
+    axup.set_ylabel('P (W)', rotation=0)
+    axup.axhline(y=0, color='k', linewidth=0.5)
+    axup.set_xlim(left=ts[0], right=ts[-1])
+    axup.legend(loc='upper right')
+    axdown.set_title('$( P_{R}(t) + P_{C}(t) + P_{L}(t) )$ v.s. $P_{emf}(t)$ ' + f'( dt = {CC.dt} )')
+    axdown.set_xlabel('t (sec)')
+    axdown.set_ylabel('P (W)', rotation=0, labelpad=15)
+    axdown.axhline(y=0, color='k', linewidth=0.5)
+    axdown.set_xlim(left=ts[0], right=ts[-1])
+    axdown.legend(loc='upper right')
+    plt.tight_layout()
     plt.show()
 
 
 # task_2()
-task_3()
-# task_4()
+# task_3()
+task_4()
 
 
