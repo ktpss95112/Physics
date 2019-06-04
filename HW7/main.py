@@ -28,12 +28,13 @@ def gen_t_Q_I():
         yield t, QI[0,0], QI[1,0]
 
 
-def get_t_PR_PC_PL():
+def get_t_PV_PR_PC_PL():
     ts, Qs, Is = np.array(tuple(gen_t_Q_I())).T
+    PVs = np.multiply(Is, CC.V0 * np.sin(CC.Omega * ts))
     PRs = np.multiply(Is, Is * CC.R)
     PCs = np.multiply(Is, Qs / CC.C)
     PLs = np.multiply(Is[:-1], np.diff(Is) / CC.dt * CC.L)
-    return ts, PRs, PCs, np.append(PLs, PLs[-1])
+    return ts, PVs, PRs, PCs, np.append(PLs, PLs[-1])
 
 
 def task_2():
@@ -45,7 +46,6 @@ def task_2():
 
     axQ.plot(ts, Qs*1e6, label='Q(t)', color='tab:blue')
     axI.plot(ts, Is, label='I(t)', color='tab:orange')
-    # axI.plot(ts, np.multiply(Is, Qs*1e6), color='tab:green')
 
     axQ.set_title(f'Q-t I-t Curve ( dt = {CC.dt} )')
     axQ.set_xlabel('t (sec)')
@@ -61,13 +61,52 @@ def task_2():
     plt.show()
 
 
+def task_3():
+    ts, Qs, Is = np.array(tuple(gen_t_Q_I())).T
+    Vs = np.array(CC.V0 * np.sin(CC.Omega * ts))
+
+    # determine phase led or lagged
+    for index in range(len(Is)):
+        if ts[index] > 0.0006 and (Is[index] * Is[index+1] <= 0):
+            tmpI = ts[index]
+            break
+    for index in range(len(Vs)):
+        if ts[index] > 0.0006 and (Vs[index] * Vs[index+1] <= 0):
+            tmpV = ts[index]
+            break
+    print(f'I leads V by {(tmpV-tmpI)*CC.Omega:.3f} = {(tmpV-tmpI)*CC.Omega/np.pi:.3f}*pi (unit: rad)')
+
+    # plot
+    fig = plt.figure(figsize=(7, 2.6), dpi=250)
+    axQ = fig.add_subplot(1, 1, 1)
+    axI = axQ.twinx()
+
+    axQ.plot(ts, Vs, label='V(t)', color='tab:green')
+    axI.plot(ts, Is, label='I(t)', color='tab:orange')
+
+    axQ.set_title(f'V-t I-t Curve ( dt = {CC.dt} )')
+    axQ.set_xlabel('t (sec)')
+    axQ.set_ylabel('V (V)', rotation=0)
+    axI.set_ylabel('I (A)', rotation=0)
+    axQ.tick_params(axis='y', labelcolor='tab:green')
+    axI.tick_params(axis='y', labelcolor='tab:orange')
+    axQ.axhline(y=0, color='k', linewidth=0.5)
+    axQ.set_xlim(left=ts[0], right=ts[-1])
+    axQ.legend(loc='upper left')
+    axI.legend(loc='upper right')
+    plt.subplots_adjust(left=0.1, right=0.9, top=0.88, bottom=0.17)
+    plt.show()
+
+
 def task_4():
-    ts, PRs, PCs, PLs = get_t_PR_PC_PL()
+    ts, PVs, PRs, PCs, PLs = get_t_PV_PR_PC_PL()
 
     # fig = plt.figure(figsize=(4, 3), dpi=250)
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
 
+    # ax.plot(ts, PVs, label='$P_{V}(t)$')
+    # ax.plot(ts, PRs+PCs+PLs, label='$P_{sum}(t)$')
     ax.plot(ts, PRs, label='$P_{R}(t)$')
     ax.plot(ts, PCs, label='$P_{C}(t)$')
     ax.plot(ts, PLs, label='$P_{L}(t)$')
@@ -82,6 +121,7 @@ def task_4():
 
 
 # task_2()
-task_4()
+task_3()
+# task_4()
 
 
